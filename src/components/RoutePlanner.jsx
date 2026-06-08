@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect, useLayoutEffect } from 'react'
-import html2canvas from 'html2canvas'
+import { toPng } from 'html-to-image'
 import { QRCodeSVG } from 'qrcode.react'
 import { useReveal } from '../hooks/useReveal'
 import { useLanguage } from '../context/LanguageContext'
@@ -198,12 +198,19 @@ export default function RoutePlanner() {
     if (!boardingPassRef.current || downloading) return
     setDownloading(true)
     try {
-      const canvas = await html2canvas(boardingPassRef.current, {
-        scale: 3, backgroundColor: '#ffffff', useCORS: true, logging: false,
+      const el = boardingPassRef.current
+      const dataUrl = await toPng(el, {
+        pixelRatio: 3,
+        backgroundColor: '#ffffff',
+        // Straighten the card (remove the sm:rotate-2 tilt) for a clean print
+        style: { transform: 'none', transition: 'none', boxShadow: 'none' },
+        // Embed Google Fonts so the downloaded PNG matches the screen exactly
+        includeQueryParams: true,
+        cacheBust: false,
       })
       const link    = document.createElement('a')
       link.download = `pilotkids-${route.flightNo}-${pilotName}.png`
-      link.href     = canvas.toDataURL('image/png')
+      link.href     = dataUrl
       link.click()
     } finally {
       setDownloading(false)
