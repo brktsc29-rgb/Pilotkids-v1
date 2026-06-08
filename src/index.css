@@ -96,10 +96,7 @@ body {
   height: 400px;
   transform-style: preserve-3d;
   animation: rotate-carousel 20s infinite linear;
-  transition: transform 0.5s ease-out;
-}
-.carousel-spinner:hover {
-  animation-play-state: paused;
+  will-change: transform;
 }
 
 .carousel-item {
@@ -108,12 +105,16 @@ body {
   height: 100%;
   left: 0;
   top: 0;
-  transition: transform 0.5s, opacity 0.5s;
   backface-visibility: hidden;
 }
-.carousel-item:hover {
-  transform: translateZ(50px) scale(1.05) !important;
-  z-index: 50;
+
+/* Hover efekti kart içeriğine uygulanıyor, item transform'una değil */
+.carousel-item .carousel-card {
+  transition: background 0.3s, box-shadow 0.3s;
+}
+.carousel-item .carousel-card:hover {
+  background: rgba(255, 255, 255, 0.08);
+  box-shadow: 0 0 40px rgba(255, 198, 64, 0.15);
 }
 
 @keyframes rotate-carousel {
