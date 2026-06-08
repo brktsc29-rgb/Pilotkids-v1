@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from 'react'
 import html2canvas from 'html2canvas'
 import { useReveal } from '../hooks/useReveal'
+import Barcode from './Barcode'
 
 const ROUTES = {
   'IST-CDG': {
@@ -412,10 +413,11 @@ export default function RoutePlanner() {
               </div>
 
               {/* Barcode */}
-              <div className="pt-2 opacity-70">
-                <div className="w-full h-10" style={{
-                  background: 'repeating-linear-gradient(90deg,black,black 2px,transparent 2px,transparent 6px)',
-                }} />
+              <div className="pt-2">
+                <Barcode value={`${route.flightNo}-${selectedRoute}`} height={52} />
+                <p className="text-center font-mono text-[8px] text-gray-400 tracking-widest mt-1 select-none">
+                  {route.flightNo} {selectedRoute.replace('-', ' ')}
+                </p>
               </div>
             </div>
           </div>
