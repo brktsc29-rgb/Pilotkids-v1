@@ -9,7 +9,7 @@ import Events from './components/Events'
 import Footer from './components/Footer'
 
 function AppContent() {
-  const { isRTL } = useLanguage()
+  const { isRTL, lang } = useLanguage()
 
   useEffect(() => {
     document.documentElement.dir = isRTL ? 'rtl' : 'ltr'
