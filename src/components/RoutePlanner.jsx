@@ -1,4 +1,4 @@
-import { useState, useRef } from 'react'
+import { useState, useRef, useEffect, useLayoutEffect } from 'react'
 import html2canvas from 'html2canvas'
 import { QRCodeSVG } from 'qrcode.react'
 import { useReveal } from '../hooks/useReveal'
@@ -16,8 +16,8 @@ const ROUTES = {
     flightNo: 'PK-2024',
   },
   'LHR-JFK': {
-    origin:   { code: 'LHR', name: 'LONDON',   nodeId: 'node-LHR' },
-    dest:     { code: 'JFK', name: 'NEW YORK', nodeId: 'node-JFK' },
+    origin:   { code: 'LHR', name: 'LONDON',      nodeId: 'node-LHR' },
+    dest:     { code: 'JFK', name: 'NEW YORK',    nodeId: 'node-JFK' },
     path:     'M 499 200 Q 390 175 295 226',
     gate:     'A-04', seat: '05-C',
     flightNo: 'PK-1969',
@@ -36,6 +36,34 @@ const ROUTES = {
     gate:     'E-09', seat: '02-B',
     flightNo: 'PK-7777',
   },
+  'JFK-CDG': {
+    origin:   { code: 'JFK', name: 'NEW YORK', nodeId: 'node-JFK' },
+    dest:     { code: 'CDG', name: 'PARIS',    nodeId: 'node-CDG' },
+    path:     'M 295 226 Q 390 170 507 206',
+    gate:     'C-07', seat: '02-A',
+    flightNo: 'PK-0001',
+  },
+  'IST-DXB': {
+    origin:   { code: 'IST', name: 'ISTANBUL', nodeId: 'node-IST' },
+    dest:     { code: 'DXB', name: 'DUBAI',    nodeId: 'node-DXB' },
+    path:     'M 578 225 Q 615 238 654 257',
+    gate:     'F-03', seat: '04-D',
+    flightNo: 'PK-4500',
+  },
+  'LAX-NRT': {
+    origin:   { code: 'LAX', name: 'LOS ANGELES', nodeId: 'node-LAX' },
+    dest:     { code: 'NRT', name: 'TOKYO',        nodeId: 'node-NRT' },
+    path:     'M 171 240 Q 520 145 890 235',
+    gate:     'H-11', seat: '07-F',
+    flightNo: 'PK-8800',
+  },
+  'FCO-SYD': {
+    origin:   { code: 'FCO', name: 'ROME',   nodeId: 'node-FCO' },
+    dest:     { code: 'SYD', name: 'SYDNEY', nodeId: 'node-SYD' },
+    path:     'M 534 223 Q 728 285 920 361',
+    gate:     'D-15', seat: '06-E',
+    flightNo: 'PK-6100',
+  },
 }
 
 // Mercator-projected coordinates (W=1000, H=600)
@@ -48,6 +76,8 @@ const CITY_NODES = [
   { id: 'node-NRT', cx: 890, cy: 235, label: 'NRT' },
   { id: 'node-FCO', cx: 534, cy: 223, label: 'FCO' },
   { id: 'node-DXB', cx: 654, cy: 257, label: 'DXB' },
+  { id: 'node-LAX', cx: 171, cy: 240, label: 'LAX' },
+  { id: 'node-SYD', cx: 920, cy: 361, label: 'SYD' },
 ]
 
 const MAP_W = 1000
@@ -87,7 +117,7 @@ export default function RoutePlanner() {
   const { t, LANGUAGES, lang } = useLanguage()
   const r = t.route
 
-  const [selectedRoute, setSelectedRoute] = useState('IST-CDG')
+  const [selectedRoute, setSelectedRoute] = useState(null)
   const [pilotName, setPilotName]         = useState(r.pilotPlaceholder)
   const [passAnim, setPassAnim]           = useState(false)
   const [boarded, setBoarded]             = useState(false)
@@ -96,14 +126,60 @@ export default function RoutePlanner() {
   const revealRef       = useReveal()
   const boardingPassRef = useRef(null)
 
-  const route    = ROUTES[selectedRoute]
+  // Map zoom animation via direct DOM manipulation (no React re-renders per frame)
+  const svgRef         = useRef(null)
+  const rafRef         = useRef(null)
+  const delayRef       = useRef(null)
+  const vbRef          = useRef([0, 0, MAP_W, MAP_H])
+  const isFirstRender  = useRef(true)
+
+  function runZoom(targetStr) {
+    if (rafRef.current) cancelAnimationFrame(rafRef.current)
+    const from = [...vbRef.current]
+    const to   = targetStr.split(' ').map(Number)
+    const t0   = performance.now()
+    const dur  = 750
+    function tick(now) {
+      const p = Math.min((now - t0) / dur, 1)
+      // ease in-out cubic
+      const e = p < 0.5 ? 4*p*p*p : 1 - Math.pow(-2*p + 2, 3) / 2
+      const vb = from.map((v, i) => v + (to[i] - v) * e)
+      vbRef.current = vb
+      svgRef.current?.setAttribute('viewBox', vb.join(' '))
+      if (p < 1) rafRef.current = requestAnimationFrame(tick)
+      else vbRef.current = to
+    }
+    rafRef.current = requestAnimationFrame(tick)
+  }
+
+  // Set initial full-world viewBox before first paint
+  useLayoutEffect(() => {
+    svgRef.current?.setAttribute('viewBox', `0 0 ${MAP_W} ${MAP_H}`)
+    return () => {
+      clearTimeout(delayRef.current)
+      if (rafRef.current) cancelAnimationFrame(rafRef.current)
+    }
+  }, [])
+
+  // Zoom when selected route changes; skip on initial mount
+  useEffect(() => {
+    if (isFirstRender.current) { isFirstRender.current = false; return }
+    if (selectedRoute) {
+      runZoom(routeViewBox(ROUTES[selectedRoute]))
+    } else {
+      runZoom(`0 0 ${MAP_W} ${MAP_H}`)
+    }
+  }, [selectedRoute]) // eslint-disable-line
+
+  const route    = selectedRoute ? ROUTES[selectedRoute] : null
   const langMeta = LANGUAGES.find(l => l.code === lang)
   const today    = new Date().toLocaleDateString(langMeta?.locale || 'tr-TR', {
     day: '2-digit', month: 'long', year: 'numeric',
   })
 
   function handleRouteChange(e) {
-    setSelectedRoute(e.target.value)
+    const val = e.target.value
+    setSelectedRoute(val || null)
     setPassAnim(true)
     setBoarded(false)
     setTimeout(() => setPassAnim(false), 300)
@@ -147,8 +223,8 @@ export default function RoutePlanner() {
         {/* Map card — always visible */}
         <div className="w-full h-52 sm:h-64 md:h-80 rounded-2xl overflow-hidden border border-white/10 bg-[#050a0a]">
           <svg
+            ref={svgRef}
             className="w-full h-full"
-            viewBox={routeViewBox(route)}
             preserveAspectRatio="xMidYMid meet"
             xmlns="http://www.w3.org/2000/svg"
           >
@@ -160,8 +236,9 @@ export default function RoutePlanner() {
                 stroke="rgba(255,255,255,0.04)" strokeWidth="1" />
             ))}
 
+            {/* All city nodes — dim when inactive */}
             {CITY_NODES.map(({ id, cx, cy, label }) => {
-              const active = id === route.origin.nodeId || id === route.dest.nodeId
+              const active = route && (id === route.origin.nodeId || id === route.dest.nodeId)
               if (active) return null
               return (
                 <g key={id}>
@@ -175,43 +252,45 @@ export default function RoutePlanner() {
               )
             })}
 
-            <path
-              d={route.path}
-              fill="none"
-              stroke="#ffc640"
-              strokeWidth="2.5"
-              strokeLinecap="round"
-              strokeDasharray="8 5"
-              opacity="0.9"
-              style={{ animation: 'dash 2s linear infinite' }}
-            />
+            {/* Route path + active endpoints — only when a route is selected */}
+            {route && (
+              <>
+                <path
+                  d={route.path}
+                  fill="none"
+                  stroke="#ffc640"
+                  strokeWidth="2.5"
+                  strokeLinecap="round"
+                  strokeDasharray="8 5"
+                  opacity="0.9"
+                  style={{ animation: 'dash 2s linear infinite' }}
+                />
 
-            {CITY_NODES.map(({ id, cx, cy, label }) => {
-              const active = id === route.origin.nodeId || id === route.dest.nodeId
-              if (!active) return null
-              return (
-                <g key={id}>
-                  <circle cx={cx} cy={cy} r={5} fill="none"
-                    stroke="rgba(255,198,64,0.6)" strokeWidth="1.5">
-                    <animate attributeName="r" from="5" to="22" dur="1.8s" repeatCount="indefinite" />
-                    <animate attributeName="opacity" from="0.8" to="0" dur="1.8s" repeatCount="indefinite" />
-                  </circle>
-                  <circle cx={cx} cy={cy} r={5} fill="#ffc640" />
-                  <text x={cx + 8} y={cy + 4} fontSize="9" fill="#ffc640"
-                    fontFamily="Montserrat,sans-serif" fontWeight="700">
-                    {label}
-                  </text>
-                </g>
-              )
-            })}
+                {CITY_NODES.filter(n => n.id === route.origin.nodeId || n.id === route.dest.nodeId)
+                  .map(({ id, cx, cy, label }) => (
+                  <g key={id}>
+                    <circle cx={cx} cy={cy} r={5} fill="none"
+                      stroke="rgba(255,198,64,0.6)" strokeWidth="1.5">
+                      <animate attributeName="r" from="5" to="22" dur="1.8s" repeatCount="indefinite" />
+                      <animate attributeName="opacity" from="0.8" to="0" dur="1.8s" repeatCount="indefinite" />
+                    </circle>
+                    <circle cx={cx} cy={cy} r={5} fill="#ffc640" />
+                    <text x={cx + 8} y={cy + 4} fontSize="9" fill="#ffc640"
+                      fontFamily="Montserrat,sans-serif" fontWeight="700">
+                      {label}
+                    </text>
+                  </g>
+                ))}
 
-            <circle
-              key={"plane-" + selectedRoute}
-              r="5"
-              fill="#ffc640"
-              className="plane-motion"
-              style={{ offsetPath: "path('" + route.path + "')" }}
-            />
+                <circle
+                  key={"plane-" + selectedRoute}
+                  r="5"
+                  fill="#ffc640"
+                  className="plane-motion"
+                  style={{ offsetPath: "path('" + route.path + "')" }}
+                />
+              </>
+            )}
           </svg>
         </div>
 
@@ -237,10 +316,11 @@ export default function RoutePlanner() {
                 {r.routeLabel}
               </label>
               <select
-                value={selectedRoute}
+                value={selectedRoute || ''}
                 onChange={handleRouteChange}
                 className="w-full bg-surface-container-high border border-white/10 rounded-lg p-4 focus:border-secondary outline-none transition-all text-white font-label-bold appearance-none cursor-pointer"
               >
+                <option value="" disabled>{r.routeLabel}</option>
                 {Object.keys(ROUTES).map(key => (
                   <option key={key} value={key}>{r.routes[key]}</option>
                 ))}
@@ -258,11 +338,19 @@ export default function RoutePlanner() {
             </button>
           </div>
 
-        {/* Right: boarding pass */}
+        {/* Right: boarding pass or placeholder */}
         <div className="flex flex-col items-center gap-4">
+          {!route && (
+            <div className="w-full max-w-md rounded-2xl border border-dashed border-white/15 bg-white/[0.03] flex flex-col items-center justify-center gap-4 py-20 px-8 text-center">
+              <span className="material-symbols-outlined text-5xl text-white/20">flight_takeoff</span>
+              <p className="font-label-bold text-label-bold text-white/25 uppercase tracking-widest text-sm">
+                {r.routeLabel}
+              </p>
+            </div>
+          )}
           <div
             ref={boardingPassRef}
-            className={"relative bg-white text-black w-full max-w-md rounded-2xl overflow-hidden shadow-2xl transition-all duration-300 " + (passAnim ? 'scale-105' : 'sm:rotate-2 hover:rotate-0')}
+            className={"relative bg-white text-black w-full max-w-md rounded-2xl overflow-hidden shadow-2xl transition-all duration-300 " + (!route ? 'hidden' : passAnim ? 'scale-105' : 'sm:rotate-2 hover:rotate-0')}
           >
             {boarded && (
               <div className="absolute inset-0 flex items-center justify-center z-20 pointer-events-none">
@@ -361,8 +449,8 @@ export default function RoutePlanner() {
 
           <button
             onClick={handleDownload}
-            disabled={downloading}
-            className="flex items-center gap-2 border border-white/20 text-white/70 hover:text-white hover:border-secondary font-label-bold text-label-bold px-6 py-3 rounded-full transition-all disabled:opacity-50"
+            disabled={downloading || !route}
+            className={"flex items-center gap-2 border border-white/20 text-white/70 hover:text-white hover:border-secondary font-label-bold text-label-bold px-6 py-3 rounded-full transition-all disabled:opacity-50 " + (!route ? 'invisible' : '')}
           >
             <span className="material-symbols-outlined text-base">
               {downloading ? 'hourglass_top' : 'download'}
