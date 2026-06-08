@@ -18,35 +18,40 @@ function mercator(lon, lat) {
 }
 
 function ringToPath(ring) {
-  return ring
-    .map(([lon, lat], i) => {
-      const [x, y] = mercator(lon, lat)
-      return `${i === 0 ? 'M' : 'L'} ${x.toFixed(1)},${y.toFixed(1)}`
-    })
-    .join(' ') + ' Z'
+  if (ring.length < 2) return ''
+  const pts = ring.map(([lon, lat]) => mercator(lon, lat))
+  let d = `M ${pts[0][0].toFixed(1)},${pts[0][1].toFixed(1)}`
+  for (let i = 1; i < pts.length; i++) {
+    const [px] = pts[i - 1]
+    const [x, y] = pts[i]
+    // Large horizontal jump = antimeridian crossing — lift pen instead of drawing line
+    if (Math.abs(x - px) > W * 0.5) {
+      d += ` M ${x.toFixed(1)},${y.toFixed(1)}`
+    } else {
+      d += ` L ${x.toFixed(1)},${y.toFixed(1)}`
+    }
+  }
+  // Close only if last→first segment doesn't cross the antimeridian
+  const [lx] = pts[pts.length - 1]
+  const [fx] = pts[0]
+  if (Math.abs(fx - lx) <= W * 0.5) d += ' Z'
+  return d
 }
 
 function geometryToPath(geometry) {
-  const paths = []
   if (!geometry) return ''
-
   const rings =
-    geometry.type === 'Polygon'
-      ? geometry.coordinates
-      : geometry.type === 'MultiPolygon'
-      ? geometry.coordinates.flat()
-      : []
-
-  for (const ring of rings) {
-    // Clamp latitudes to valid Mercator range
-    const clamped = ring.map(([lon, lat]) => [lon, Math.max(-85, Math.min(85, lat))])
-    paths.push(ringToPath(clamped))
-  }
-  return paths.join(' ')
+    geometry.type === 'Polygon'      ? geometry.coordinates :
+    geometry.type === 'MultiPolygon' ? geometry.coordinates.flat() : []
+  return rings
+    .map(ring => ring.map(([lon, lat]) => [lon, Math.max(-85, Math.min(85, lat))]))
+    .map(ringToPath)
+    .filter(Boolean)
+    .join(' ')
 }
 
 const topoPath = join(__dirname, '../node_modules/world-atlas/countries-110m.json')
-const topo = JSON.parse(readFileSync(topoPath, 'utf8'))
+const topo     = JSON.parse(readFileSync(topoPath, 'utf8'))
 const countries = feature(topo, topo.objects.countries)
 
 let paths = ''

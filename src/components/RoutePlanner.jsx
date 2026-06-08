@@ -94,9 +94,9 @@ function routeViewBox(route) {
   const spanX = Math.abs(d.cx - o.cx)
   const spanY = Math.abs(d.cy - o.cy)
 
-  // Padding: 50 % of span each side, minimum 150 px H / 120 px V
-  const padX = Math.max(150, spanX * 0.5)
-  const padY = Math.max(120, spanY * 0.5)
+  // Padding: 30 % of span each side, minimum 90 px H / 70 px V
+  const padX = Math.max(90, spanX * 0.3)
+  const padY = Math.max(70, spanY * 0.3)
   let vbW = spanX + 2 * padX
   let vbH = spanY + 2 * padY
 
