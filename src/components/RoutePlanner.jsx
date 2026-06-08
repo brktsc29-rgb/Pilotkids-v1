@@ -70,6 +70,32 @@ const CONTINENTS = [
   'M 735 430 L 758 418 L 782 415 L 808 418 L 832 428 L 848 445 L 852 468 L 845 492 L 828 508 L 808 518 L 782 522 L 758 518 L 738 505 L 722 488 L 715 465 L 718 442 Z',
 ]
 
+const AR = 1000 / 600  // original map aspect ratio
+
+function routeViewBox(route) {
+  const o = CITY_NODES.find(n => n.id === route.origin.nodeId)
+  const d = CITY_NODES.find(n => n.id === route.dest.nodeId)
+  if (!o || !d) return '0 0 1000 600'
+
+  const cx = (o.cx + d.cx) / 2
+  const cy = (o.cy + d.cy) / 2
+
+  // Ensure enough context around the route
+  const routeSpanX = Math.abs(d.cx - o.cx)
+  const routeSpanY = Math.abs(d.cy - o.cy)
+  let vbW = Math.max(routeSpanX + 360, 640)
+  let vbH = Math.max(routeSpanY + 280, 400)
+
+  // Lock to original 5:3 aspect so continents don't stretch
+  if (vbW / vbH > AR) {
+    vbH = vbW / AR
+  } else {
+    vbW = vbH * AR
+  }
+
+  return `${cx - vbW / 2} ${cy - vbH / 2} ${vbW} ${vbH}`
+}
+
 export default function RoutePlanner() {
   const { t, LANGUAGES, lang } = useLanguage()
   const r = t.route
@@ -122,8 +148,8 @@ export default function RoutePlanner() {
       <div className="absolute inset-0 pointer-events-none" aria-hidden="true">
         <svg
           className="w-full h-full"
-          viewBox="0 0 1000 600"
-          preserveAspectRatio="xMidYMid slice"
+          viewBox={routeViewBox(route)}
+          preserveAspectRatio="xMidYMid meet"
           xmlns="http://www.w3.org/2000/svg"
         >
           <defs>
