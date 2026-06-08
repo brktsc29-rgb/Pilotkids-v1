@@ -131,6 +131,17 @@ body {
   }
 }
 
+/* ─── Boarding stamp ────────────────────────────────── */
+@keyframes stamp-in {
+  0%   { transform: rotate(-15deg) scale(3.5); opacity: 0; }
+  55%  { transform: rotate(-15deg) scale(0.90); opacity: 1; }
+  75%  { transform: rotate(-15deg) scale(1.06); }
+  100% { transform: rotate(-15deg) scale(1);    opacity: 1; }
+}
+.stamp-in {
+  animation: stamp-in 0.45s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+}
+
 /* ─── Scroll reveal ─────────────────────────────────── */
 .reveal {
   opacity: 0;

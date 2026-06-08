@@ -74,6 +74,7 @@ export default function RoutePlanner() {
   const [passAnim, setPassAnim]           = useState(false)
   const [planePos, setPlanePos]           = useState({ x: 0, y: 0, angle: 0 })
   const [downloading, setDownloading]     = useState(false)
+  const [boarded, setBoarded]             = useState(false)
 
   const revealRef      = useReveal()
   const pathRef        = useRef(null)
@@ -110,6 +111,7 @@ export default function RoutePlanner() {
   function handleRouteChange(e) {
     setSelectedRoute(e.target.value)
     setPassAnim(true)
+    setBoarded(false)
     setTimeout(() => setPassAnim(false), 300)
   }
 
@@ -277,7 +279,10 @@ export default function RoutePlanner() {
               </select>
             </div>
 
-            <button className="w-full bg-on-tertiary-container text-white font-label-bold text-label-bold py-5 rounded-lg flex justify-center items-center gap-2 group hover:brightness-110 active:scale-95 transition-all">
+            <button
+              onClick={() => setBoarded(true)}
+              className="w-full bg-on-tertiary-container text-white font-label-bold text-label-bold py-5 rounded-lg flex justify-center items-center gap-2 group hover:brightness-110 active:scale-95 transition-all"
+            >
               UÇUŞA HAZIRIM
               <span className="material-symbols-outlined group-hover:rotate-45 transition-transform">flight</span>
             </button>
@@ -289,10 +294,62 @@ export default function RoutePlanner() {
           {/* Card */}
           <div
             ref={boardingPassRef}
-            className={`bg-white text-black w-full max-w-md rounded-2xl overflow-hidden shadow-2xl transition-all duration-300 ${
+            className={`relative bg-white text-black w-full max-w-md rounded-2xl overflow-hidden shadow-2xl transition-all duration-300 ${
               passAnim ? 'scale-105' : 'sm:rotate-2 hover:rotate-0'
             }`}
           >
+            {/* BOARDED stamp overlay */}
+            {boarded && (
+              <div className="absolute inset-0 flex items-center justify-center z-20 pointer-events-none">
+                <div
+                  className="stamp-in flex flex-col items-center gap-1 px-8 py-4 select-none"
+                  style={{
+                    border: '5px solid #1e3a8a',
+                    outline: '2px solid #1e3a8a',
+                    outlineOffset: '4px',
+                    color: '#1e3a8a',
+                    mixBlendMode: 'multiply',
+                    opacity: 0.82,
+                  }}
+                >
+                  <span
+                    style={{
+                      fontFamily: '"Bebas Neue", cursive',
+                      fontSize: '3.2rem',
+                      lineHeight: 1,
+                      letterSpacing: '0.18em',
+                      color: '#1e3a8a',
+                    }}
+                  >
+                    BOARDED
+                  </span>
+                  <span
+                    style={{
+                      fontFamily: 'Montserrat, sans-serif',
+                      fontSize: '0.55rem',
+                      fontWeight: 700,
+                      letterSpacing: '0.35em',
+                      color: '#1e3a8a',
+                    }}
+                  >
+                    ✦ PILOTKIDS AIRLINES ✦
+                  </span>
+                  <span
+                    style={{
+                      fontFamily: 'Montserrat, sans-serif',
+                      fontSize: '0.5rem',
+                      fontWeight: 600,
+                      letterSpacing: '0.2em',
+                      color: '#1e3a8a',
+                      opacity: 0.7,
+                    }}
+                  >
+                    {route.flightNo} · {today}
+                  </span>
+                </div>
+              </div>
+            )}
+
             {/* Header bar */}
             <div className="bg-on-tertiary-container p-4 flex justify-between items-center text-white">
               <span className="font-label-bold text-[10px] tracking-widest">PILOTKIDS AIRLINES</span>
