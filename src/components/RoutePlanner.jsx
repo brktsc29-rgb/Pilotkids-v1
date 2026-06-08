@@ -91,26 +91,35 @@ function routeViewBox(route) {
 
   const cx = (o.cx + d.cx) / 2
   const cy = (o.cy + d.cy) / 2
+  const spanX = Math.abs(d.cx - o.cx)
+  const spanY = Math.abs(d.cy - o.cy)
 
-  const routeSpanX = Math.abs(d.cx - o.cx)
-  const routeSpanY = Math.abs(d.cy - o.cy)
-  let vbW = Math.max(routeSpanX + 360, 640)
-  let vbH = Math.max(routeSpanY + 280, 400)
+  // Padding: 50 % of span each side, minimum 150 px H / 120 px V
+  const padX = Math.max(150, spanX * 0.5)
+  const padY = Math.max(120, spanY * 0.5)
+  let vbW = spanX + 2 * padX
+  let vbH = spanY + 2 * padY
 
-  // Preserve map aspect ratio so countries don't distort
+  // Lock to map aspect ratio (no country distortion)
   if (vbW / vbH > AR) {
     vbH = vbW / AR
   } else {
     vbW = vbH * AR
   }
 
-  // Keep viewBox within map bounds
-  let x0 = cx - vbW / 2
-  let y0 = cy - vbH / 2
-  x0 = Math.max(0, Math.min(x0, MAP_W - vbW))
-  y0 = Math.max(0, Math.min(y0, MAP_H - vbH))
+  // Cap at full-map size — never zoom out beyond the whole map
+  if (vbW > MAP_W) {
+    vbW = MAP_W
+    vbH = MAP_H   // MAP_W / AR === MAP_H since AR = MAP_W / MAP_H
+  }
 
-  return `${x0} ${y0} ${vbW} ${vbH}`
+  // Center exactly on the route midpoint.
+  // Do NOT clamp position: the SVG renders dark background outside map bounds,
+  // so overflow looks fine and keeps both endpoints perfectly centered.
+  const x0 = cx - vbW / 2
+  const y0 = cy - vbH / 2
+
+  return `${x0.toFixed(1)} ${y0.toFixed(1)} ${vbW.toFixed(1)} ${vbH.toFixed(1)}`
 }
 
 export default function RoutePlanner() {
