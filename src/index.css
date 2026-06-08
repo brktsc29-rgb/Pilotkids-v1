@@ -54,11 +54,11 @@ body {
 
 /* ─── SVG route dash animation ──────────────────────── */
 .route-line {
-  stroke-dasharray: 10;
-  animation: dash 20s linear infinite;
+  stroke-dasharray: 8 5;
+  animation: dash 2s linear infinite;
 }
 @keyframes dash {
-  to { stroke-dashoffset: -500; }
+  to { stroke-dashoffset: -26; }
 }
 
 /* ─── City node active state ────────────────────────── */
@@ -79,6 +79,16 @@ body {
   animation: pulse-ring 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
 }
 
+/* CSS Motion Path — uçak animasyonu (sıfır JS, tam GPU) */
+@keyframes move-plane {
+  from { offset-distance: 0%; }
+  to   { offset-distance: 100%; }
+}
+.plane-motion {
+  offset-rotate: auto;
+  animation: move-plane 3s linear infinite;
+}
+
 /* ─── 3D Carousel ───────────────────────────────────── */
 .carousel-perspective {
   perspective: 2000px;
@@ -96,10 +106,7 @@ body {
   height: 400px;
   transform-style: preserve-3d;
   animation: rotate-carousel 20s infinite linear;
-  transition: transform 0.5s ease-out;
-}
-.carousel-spinner:hover {
-  animation-play-state: paused;
+  will-change: transform;
 }
 
 .carousel-item {
@@ -108,12 +115,22 @@ body {
   height: 100%;
   left: 0;
   top: 0;
-  transition: transform 0.5s, opacity 0.5s;
   backface-visibility: hidden;
 }
-.carousel-item:hover {
-  transform: translateZ(50px) scale(1.05) !important;
-  z-index: 50;
+
+/* Carousel kart stili — preserve-3d içinde backdrop-filter kullanmıyoruz.
+   Chromium, preserve-3d altındaki backdrop-filter'ı her frame recomposite
+   eder; bu GPU'yu kasıya götürür. Solid opak arka plan kullanıyoruz. */
+.carousel-item .carousel-card {
+  background: rgba(14, 16, 16, 0.92);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-top-color: rgba(255, 255, 255, 0.2);
+  border-left-color: rgba(255, 255, 255, 0.2);
+  transition: background 0.3s, box-shadow 0.3s;
+}
+.carousel-item .carousel-card:hover {
+  background: rgba(255, 255, 255, 0.07);
+  box-shadow: 0 0 40px rgba(255, 198, 64, 0.12);
 }
 
 @keyframes rotate-carousel {
@@ -131,6 +148,17 @@ body {
   }
 }
 
+/* ─── Boarding stamp ────────────────────────────────── */
+@keyframes stamp-in {
+  0%   { transform: rotate(-15deg) scale(3.5); opacity: 0; }
+  55%  { transform: rotate(-15deg) scale(0.90); opacity: 1; }
+  75%  { transform: rotate(-15deg) scale(1.06); }
+  100% { transform: rotate(-15deg) scale(1);    opacity: 1; }
+}
+.stamp-in {
+  animation: stamp-in 0.45s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+}
+
 /* ─── Scroll reveal ─────────────────────────────────── */
 .reveal {
   opacity: 0;
@@ -140,33 +168,6 @@ body {
 .reveal.visible {
   opacity: 1;
   transform: translateY(0);
-}
-
-/* ─── Carousel card (solid bg — no backdrop-filter inside preserve-3d) ─ */
-.carousel-card {
-  background: rgba(14, 16, 16, 0.92);
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  border-top: 1px solid rgba(255, 255, 255, 0.15);
-}
-
-/* ─── Boarding-pass stamp ───────────────────────────── */
-@keyframes stamp-in {
-  0%   { transform: scale(3.5) rotate(-15deg); opacity: 0; }
-  60%  { transform: scale(0.9) rotate(-15deg); opacity: 1; }
-  100% { transform: scale(1)   rotate(-15deg); opacity: 1; }
-}
-.stamp-in {
-  animation: stamp-in 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
-}
-
-/* ─── CSS Motion Path plane ─────────────────────────── */
-@keyframes move-plane {
-  from { offset-distance: 0%; }
-  to   { offset-distance: 100%; }
-}
-.plane-motion {
-  offset-distance: 0%;
-  animation: move-plane 4s linear infinite;
 }
 
 /* ─── Material Symbols ──────────────────────────────── */
