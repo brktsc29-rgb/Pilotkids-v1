@@ -340,123 +340,126 @@ export default function RoutePlanner() {
 
         {/* Right: boarding pass or placeholder */}
         <div className="flex flex-col items-center gap-4">
-          {!route && (
+          {!route ? (
             <div className="w-full max-w-md rounded-2xl border border-dashed border-white/15 bg-white/[0.03] flex flex-col items-center justify-center gap-4 py-20 px-8 text-center">
               <span className="material-symbols-outlined text-5xl text-white/20">flight_takeoff</span>
               <p className="font-label-bold text-label-bold text-white/25 uppercase tracking-widest text-sm">
                 {r.routeLabel}
               </p>
             </div>
+          ) : (
+            <>
+              <div
+                ref={boardingPassRef}
+                className={"relative bg-white text-black w-full max-w-md rounded-2xl overflow-hidden shadow-2xl transition-all duration-300 " + (passAnim ? 'scale-105' : 'sm:rotate-2 hover:rotate-0')}
+              >
+                {boarded && (
+                  <div className="absolute inset-0 flex items-center justify-center z-20 pointer-events-none">
+                    <div
+                      className="stamp-in flex flex-col items-center gap-1 px-8 py-4 select-none"
+                      style={{
+                        border: '5px solid #1e3a8a',
+                        outline: '2px solid #1e3a8a',
+                        outlineOffset: '4px',
+                        color: '#1e3a8a',
+                        mixBlendMode: 'multiply',
+                        opacity: 0.82,
+                      }}
+                    >
+                      <span style={{ fontFamily: '"Bebas Neue",cursive', fontSize: '3.2rem', lineHeight: 1, letterSpacing: '0.18em', color: '#1e3a8a' }}>
+                        {r.pass.boarded}
+                      </span>
+                      <span style={{ fontFamily: 'Montserrat,sans-serif', fontSize: '0.55rem', fontWeight: 700, letterSpacing: '0.35em', color: '#1e3a8a' }}>
+                        {r.pass.boardedSub}
+                      </span>
+                      <span style={{ fontFamily: 'Montserrat,sans-serif', fontSize: '0.5rem', fontWeight: 600, letterSpacing: '0.2em', color: '#1e3a8a', opacity: 0.7 }}>
+                        {route.flightNo} · {today}
+                      </span>
+                    </div>
+                  </div>
+                )}
+
+                <div className="bg-on-tertiary-container p-4 flex justify-between items-center text-white">
+                  <span className="font-label-bold text-[10px] tracking-widest">{r.pass.airline}</span>
+                  <span className="material-symbols-outlined text-sm">flight</span>
+                </div>
+
+                <div className="p-6 sm:p-8 space-y-5">
+                  <div className="flex justify-between items-start">
+                    <div>
+                      <p className="text-[10px] font-bold text-gray-500 uppercase">{r.pass.captainLabel}</p>
+                      <h4 className="font-headline-md text-headline-md tracking-tight uppercase leading-none">
+                        {pilotName}
+                      </h4>
+                      <p className="text-[10px] text-on-tertiary-container font-bold uppercase mt-1">
+                        {r.pass.readyText}
+                      </p>
+                    </div>
+                    <div className="flex flex-col items-center gap-1">
+                      <QRCodeSVG value={SITE_URL} size={68} bgColor="#ffffff" fgColor="#1e3a8a" level="M" />
+                      <span className="text-[7px] font-bold text-gray-400 tracking-wider uppercase">
+                        pilotkids.com.tr
+                      </span>
+                    </div>
+                  </div>
+
+                  <div className="rivet-border" />
+
+                  <div className="flex justify-between items-center gap-2">
+                    <div className="text-center flex-1">
+                      <div className="font-display-xl text-4xl sm:text-5xl leading-none">{route.origin.code}</div>
+                      <p className="text-[10px] font-bold text-gray-500 mt-1">{route.origin.name}</p>
+                    </div>
+                    <div className="flex flex-col items-center shrink-0">
+                      <span className="material-symbols-outlined text-on-tertiary-container">arrow_forward</span>
+                      <span className="text-[8px] font-bold text-gray-400 mt-1">{route.flightNo}</span>
+                    </div>
+                    <div className="text-center flex-1">
+                      <div className="font-display-xl text-4xl sm:text-5xl leading-none">{route.dest.code}</div>
+                      <p className="text-[10px] font-bold text-gray-500 mt-1">{route.dest.name}</p>
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-4 gap-3 pt-4 border-t border-gray-100">
+                    <div>
+                      <p className="text-[8px] font-bold text-gray-400 uppercase">{r.pass.gate}</p>
+                      <p className="font-bold text-sm">{route.gate}</p>
+                    </div>
+                    <div>
+                      <p className="text-[8px] font-bold text-gray-400 uppercase">{r.pass.seat}</p>
+                      <p className="font-bold text-sm">{route.seat}</p>
+                    </div>
+                    <div>
+                      <p className="text-[8px] font-bold text-gray-400 uppercase">{r.pass.classLabel}</p>
+                      <p className="font-bold text-xs">{r.pass.classValue}</p>
+                    </div>
+                    <div>
+                      <p className="text-[8px] font-bold text-gray-400 uppercase">{r.pass.dateLabel}</p>
+                      <p className="font-bold text-[10px] leading-tight">{today}</p>
+                    </div>
+                  </div>
+
+                  <div className="pt-2">
+                    <Barcode value={route.flightNo + "-" + selectedRoute} height={52} />
+                    <p className="text-center font-mono text-[8px] text-gray-400 tracking-widest mt-1 select-none">
+                      {route.flightNo} {selectedRoute.replace('-', ' ')}
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              <button
+                onClick={handleDownload}
+                disabled={downloading}
+                className="flex items-center gap-2 border border-white/20 text-white/70 hover:text-white hover:border-secondary font-label-bold text-label-bold px-6 py-3 rounded-full transition-all disabled:opacity-50"
+              >
+                <span className="material-symbols-outlined text-base">
+                  {downloading ? 'hourglass_top' : 'download'}
+                </span>
+                {downloading ? r.downloading : r.downloadBtn}
+              </button>
+            </>
           )}
-          <div
-            ref={boardingPassRef}
-            className={"relative bg-white text-black w-full max-w-md rounded-2xl overflow-hidden shadow-2xl transition-all duration-300 " + (!route ? 'hidden' : passAnim ? 'scale-105' : 'sm:rotate-2 hover:rotate-0')}
-          >
-            {boarded && (
-              <div className="absolute inset-0 flex items-center justify-center z-20 pointer-events-none">
-                <div
-                  className="stamp-in flex flex-col items-center gap-1 px-8 py-4 select-none"
-                  style={{
-                    border: '5px solid #1e3a8a',
-                    outline: '2px solid #1e3a8a',
-                    outlineOffset: '4px',
-                    color: '#1e3a8a',
-                    mixBlendMode: 'multiply',
-                    opacity: 0.82,
-                  }}
-                >
-                  <span style={{ fontFamily: '"Bebas Neue",cursive', fontSize: '3.2rem', lineHeight: 1, letterSpacing: '0.18em', color: '#1e3a8a' }}>
-                    {r.pass.boarded}
-                  </span>
-                  <span style={{ fontFamily: 'Montserrat,sans-serif', fontSize: '0.55rem', fontWeight: 700, letterSpacing: '0.35em', color: '#1e3a8a' }}>
-                    {r.pass.boardedSub}
-                  </span>
-                  <span style={{ fontFamily: 'Montserrat,sans-serif', fontSize: '0.5rem', fontWeight: 600, letterSpacing: '0.2em', color: '#1e3a8a', opacity: 0.7 }}>
-                    {route.flightNo} · {today}
-                  </span>
-                </div>
-              </div>
-            )}
-
-            <div className="bg-on-tertiary-container p-4 flex justify-between items-center text-white">
-              <span className="font-label-bold text-[10px] tracking-widest">{r.pass.airline}</span>
-              <span className="material-symbols-outlined text-sm">flight</span>
-            </div>
-
-            <div className="p-6 sm:p-8 space-y-5">
-              <div className="flex justify-between items-start">
-                <div>
-                  <p className="text-[10px] font-bold text-gray-500 uppercase">{r.pass.captainLabel}</p>
-                  <h4 className="font-headline-md text-headline-md tracking-tight uppercase leading-none">
-                    {pilotName}
-                  </h4>
-                  <p className="text-[10px] text-on-tertiary-container font-bold uppercase mt-1">
-                    {r.pass.readyText}
-                  </p>
-                </div>
-                <div className="flex flex-col items-center gap-1">
-                  <QRCodeSVG value={SITE_URL} size={68} bgColor="#ffffff" fgColor="#1e3a8a" level="M" />
-                  <span className="text-[7px] font-bold text-gray-400 tracking-wider uppercase">
-                    pilotkids.com.tr
-                  </span>
-                </div>
-              </div>
-
-              <div className="rivet-border" />
-
-              <div className="flex justify-between items-center gap-2">
-                <div className="text-center flex-1">
-                  <div className="font-display-xl text-4xl sm:text-5xl leading-none">{route.origin.code}</div>
-                  <p className="text-[10px] font-bold text-gray-500 mt-1">{route.origin.name}</p>
-                </div>
-                <div className="flex flex-col items-center shrink-0">
-                  <span className="material-symbols-outlined text-on-tertiary-container">arrow_forward</span>
-                  <span className="text-[8px] font-bold text-gray-400 mt-1">{route.flightNo}</span>
-                </div>
-                <div className="text-center flex-1">
-                  <div className="font-display-xl text-4xl sm:text-5xl leading-none">{route.dest.code}</div>
-                  <p className="text-[10px] font-bold text-gray-500 mt-1">{route.dest.name}</p>
-                </div>
-              </div>
-
-              <div className="grid grid-cols-4 gap-3 pt-4 border-t border-gray-100">
-                <div>
-                  <p className="text-[8px] font-bold text-gray-400 uppercase">{r.pass.gate}</p>
-                  <p className="font-bold text-sm">{route.gate}</p>
-                </div>
-                <div>
-                  <p className="text-[8px] font-bold text-gray-400 uppercase">{r.pass.seat}</p>
-                  <p className="font-bold text-sm">{route.seat}</p>
-                </div>
-                <div>
-                  <p className="text-[8px] font-bold text-gray-400 uppercase">{r.pass.classLabel}</p>
-                  <p className="font-bold text-xs">{r.pass.classValue}</p>
-                </div>
-                <div>
-                  <p className="text-[8px] font-bold text-gray-400 uppercase">{r.pass.dateLabel}</p>
-                  <p className="font-bold text-[10px] leading-tight">{today}</p>
-                </div>
-              </div>
-
-              <div className="pt-2">
-                <Barcode value={route.flightNo + "-" + selectedRoute} height={52} />
-                <p className="text-center font-mono text-[8px] text-gray-400 tracking-widest mt-1 select-none">
-                  {route.flightNo} {selectedRoute.replace('-', ' ')}
-                </p>
-              </div>
-            </div>
-          </div>
-
-          <button
-            onClick={handleDownload}
-            disabled={downloading || !route}
-            className={"flex items-center gap-2 border border-white/20 text-white/70 hover:text-white hover:border-secondary font-label-bold text-label-bold px-6 py-3 rounded-full transition-all disabled:opacity-50 " + (!route ? 'invisible' : '')}
-          >
-            <span className="material-symbols-outlined text-base">
-              {downloading ? 'hourglass_top' : 'download'}
-            </span>
-            {downloading ? r.downloading : r.downloadBtn}
-          </button>
         </div>
         </div>{/* end grid */}
       </div>{/* end container */}
