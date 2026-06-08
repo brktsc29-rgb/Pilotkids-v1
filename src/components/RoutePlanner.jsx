@@ -374,32 +374,6 @@ export default function RoutePlanner() {
                 ref={boardingPassRef}
                 className={"relative bg-white text-black w-full max-w-md rounded-2xl overflow-hidden shadow-2xl transition-all duration-300 " + (passAnim ? 'scale-105' : 'sm:rotate-2 hover:rotate-0')}
               >
-                {boarded && (
-                  <div className="absolute inset-0 flex items-center justify-center z-20 pointer-events-none">
-                    <div
-                      className="stamp-in flex flex-col items-center gap-1 px-8 py-4 select-none"
-                      style={{
-                        border: '5px solid #1e3a8a',
-                        outline: '2px solid #1e3a8a',
-                        outlineOffset: '4px',
-                        color: '#1e3a8a',
-                        mixBlendMode: 'multiply',
-                        opacity: 0.82,
-                      }}
-                    >
-                      <span style={{ fontFamily: '"Bebas Neue",cursive', fontSize: '3.2rem', lineHeight: 1, letterSpacing: '0.18em', color: '#1e3a8a' }}>
-                        {r.pass.boarded}
-                      </span>
-                      <span style={{ fontFamily: 'Montserrat,sans-serif', fontSize: '0.55rem', fontWeight: 700, letterSpacing: '0.35em', color: '#1e3a8a' }}>
-                        {r.pass.boardedSub}
-                      </span>
-                      <span style={{ fontFamily: 'Montserrat,sans-serif', fontSize: '0.5rem', fontWeight: 600, letterSpacing: '0.2em', color: '#1e3a8a', opacity: 0.7 }}>
-                        {route.flightNo} · {today}
-                      </span>
-                    </div>
-                  </div>
-                )}
-
                 <div className="bg-on-tertiary-container p-4 flex justify-between items-center text-white">
                   <span className="font-label-bold text-[10px] tracking-widest">{r.pass.airline}</span>
                   <span className="material-symbols-outlined text-sm">flight</span>
@@ -426,18 +400,50 @@ export default function RoutePlanner() {
 
                   <div className="rivet-border" />
 
-                  <div className="flex justify-between items-center gap-2">
-                    <div className="text-center flex-1">
-                      <div className="font-display-xl text-4xl sm:text-5xl leading-none">{route.origin.code}</div>
-                      <p className="text-[10px] font-bold text-gray-500 mt-1">{route.origin.name}</p>
-                    </div>
-                    <div className="flex flex-col items-center shrink-0">
-                      <span className="material-symbols-outlined text-on-tertiary-container">arrow_forward</span>
-                      <span className="text-[8px] font-bold text-gray-400 mt-1">{route.flightNo}</span>
-                    </div>
-                    <div className="text-center flex-1">
-                      <div className="font-display-xl text-4xl sm:text-5xl leading-none">{route.dest.code}</div>
-                      <p className="text-[10px] font-bold text-gray-500 mt-1">{route.dest.name}</p>
+                  {/* Route row — stamp scoped here so it never overlaps the QR above */}
+                  <div className="relative">
+                    {boarded && (
+                      <div className="absolute inset-0 flex items-center justify-center z-20 pointer-events-none">
+                        <div
+                          className="stamp-in flex flex-col items-center gap-1 px-8 py-3 select-none"
+                          style={{
+                            border: '5px solid #1e3a8a',
+                            outline: '2px solid #1e3a8a',
+                            outlineOffset: '4px',
+                            color: '#1e3a8a',
+                            mixBlendMode: 'multiply',
+                            opacity: 0.82,
+                          }}
+                        >
+                          <span style={{ fontFamily: '"Bebas Neue",cursive', fontSize: '3.2rem', lineHeight: 1, letterSpacing: '0.18em', color: '#1e3a8a' }}>
+                            {r.pass.boarded}
+                          </span>
+                          <span style={{ fontFamily: 'Montserrat,sans-serif', fontSize: '0.55rem', fontWeight: 700, letterSpacing: '0.35em', color: '#1e3a8a' }}>
+                            {r.pass.boardedSub}
+                          </span>
+                          <span style={{ fontFamily: 'Montserrat,sans-serif', fontSize: '0.5rem', fontWeight: 600, letterSpacing: '0.2em', color: '#1e3a8a', opacity: 0.7 }}>
+                            {route.flightNo} · {today}
+                          </span>
+                        </div>
+                      </div>
+                    )}
+
+                    <div className="flex justify-between items-center gap-2">
+                      <div className="text-center flex-1">
+                        <div className="font-display-xl text-4xl sm:text-5xl leading-none">{route.origin.code}</div>
+                        <p className="text-[10px] font-bold text-gray-500 mt-1">{route.origin.name}</p>
+                      </div>
+                      <div className="flex flex-col items-center shrink-0">
+                        {/* Inline SVG arrow — renders correctly everywhere, no font dependency */}
+                        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                          <path d="M5 12h14M13 6l6 6-6 6" stroke="#eb4141" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"/>
+                        </svg>
+                        <span className="text-[8px] font-bold text-gray-400 mt-1">{route.flightNo}</span>
+                      </div>
+                      <div className="text-center flex-1">
+                        <div className="font-display-xl text-4xl sm:text-5xl leading-none">{route.dest.code}</div>
+                        <p className="text-[10px] font-bold text-gray-500 mt-1">{route.dest.name}</p>
+                      </div>
                     </div>
                   </div>
 
