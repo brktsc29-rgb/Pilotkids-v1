@@ -26,7 +26,7 @@ export default function Navbar() {
           PilotKids
         </button>
 
-        <div className="hidden md:flex gap-8 items-center">
+        <div className="hidden lg:flex gap-4 xl:gap-6 items-center">
           {NAV_LINKS.map(({ label, target }, i) => (
             <button
               key={target}

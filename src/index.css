@@ -170,6 +170,15 @@ body {
   transform: translateY(0);
 }
 
+/* ─── Russian: Russo One replaces Bebas Neue (no Cyrillic) ─── */
+[lang="ru"] .font-display-xl,
+[lang="ru"] .font-headline-lg,
+[lang="ru"] .font-headline-md,
+[lang="ru"] .font-headline-lg-mobile {
+  font-family: 'Russo One', sans-serif;
+  letter-spacing: 0.02em;
+}
+
 /* ─── Material Symbols ──────────────────────────────── */
 .material-symbols-outlined {
   font-family: 'Material Symbols Outlined', sans-serif;

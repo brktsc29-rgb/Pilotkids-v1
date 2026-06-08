@@ -460,7 +460,7 @@ export const translations = {
     },
     aircraft: {
       sectionLabel: 'Wähle Dein Flugzeug',
-      sectionTitle: 'Wähle Deinen Stil, Bereite Dich auf den Himmel vor!',
+      sectionTitle: 'Wähle Deinen Stil – Auf Zum Himmel!',
       planes: {
         'RED BARON':     { subtitle: 'Klassischer Doppeldecker' },
         'BLACK EAGLE':   { subtitle: 'Türkische Sonderedition' },

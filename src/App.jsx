@@ -13,8 +13,8 @@ function AppContent() {
 
   useEffect(() => {
     document.documentElement.dir = isRTL ? 'rtl' : 'ltr'
-    document.documentElement.lang = isRTL ? 'ar' : undefined
-  }, [isRTL])
+    document.documentElement.lang = lang
+  }, [isRTL, lang])
 
   return (
     <div className="font-body-md text-body-md">
