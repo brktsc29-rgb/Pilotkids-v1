@@ -11,89 +11,76 @@ const ROUTES = {
   'IST-CDG': {
     origin:   { code: 'IST', name: 'ISTANBUL', nodeId: 'node-IST' },
     dest:     { code: 'CDG', name: 'PARIS',    nodeId: 'node-CDG' },
-    path:     'M 500 250 Q 460 220 420 230',
+    path:     'M 578 225 Q 542 198 507 206',
     gate:     'B-12', seat: '01-A',
     flightNo: 'PK-2024',
   },
   'LHR-JFK': {
     origin:   { code: 'LHR', name: 'LONDON',   nodeId: 'node-LHR' },
     dest:     { code: 'JFK', name: 'NEW YORK', nodeId: 'node-JFK' },
-    path:     'M 410 210 Q 300 200 200 260',
+    path:     'M 499 200 Q 390 175 295 226',
     gate:     'A-04', seat: '05-C',
     flightNo: 'PK-1969',
   },
   'BER-NRT': {
     origin:   { code: 'BER', name: 'BERLIN', nodeId: 'node-BER' },
     dest:     { code: 'NRT', name: 'TOKYO',  nodeId: 'node-NRT' },
-    path:     'M 460 215 Q 650 170 850 280',
+    path:     'M 537 197 Q 710 155 890 235',
     gate:     'G-21', seat: '03-F',
     flightNo: 'PK-3301',
   },
   'FCO-DXB': {
     origin:   { code: 'FCO', name: 'ROME',  nodeId: 'node-FCO' },
     dest:     { code: 'DXB', name: 'DUBAI', nodeId: 'node-DXB' },
-    path:     'M 465 275 Q 550 295 620 330',
+    path:     'M 534 223 Q 592 235 654 257',
     gate:     'E-09', seat: '02-B',
     flightNo: 'PK-7777',
   },
 }
 
+// Mercator-projected coordinates (W=1000, H=600)
 const CITY_NODES = [
-  { id: 'node-IST', cx: 500, cy: 250, label: 'IST' },
-  { id: 'node-CDG', cx: 420, cy: 230, label: 'CDG' },
-  { id: 'node-LHR', cx: 410, cy: 210, label: 'LHR' },
-  { id: 'node-JFK', cx: 200, cy: 260, label: 'JFK' },
-  { id: 'node-BER', cx: 460, cy: 215, label: 'BER' },
-  { id: 'node-NRT', cx: 850, cy: 280, label: 'NRT' },
-  { id: 'node-FCO', cx: 465, cy: 275, label: 'FCO' },
-  { id: 'node-DXB', cx: 620, cy: 330, label: 'DXB' },
+  { id: 'node-IST', cx: 578, cy: 225, label: 'IST' },
+  { id: 'node-CDG', cx: 507, cy: 206, label: 'CDG' },
+  { id: 'node-LHR', cx: 499, cy: 200, label: 'LHR' },
+  { id: 'node-JFK', cx: 295, cy: 226, label: 'JFK' },
+  { id: 'node-BER', cx: 537, cy: 197, label: 'BER' },
+  { id: 'node-NRT', cx: 890, cy: 235, label: 'NRT' },
+  { id: 'node-FCO', cx: 534, cy: 223, label: 'FCO' },
+  { id: 'node-DXB', cx: 654, cy: 257, label: 'DXB' },
 ]
 
-const CONTINENTS = [
-  // North America
-  'M 30 168 L 30 222 L 44 252 L 58 285 L 72 316 L 100 350 L 150 362 L 168 388 L 196 382 L 184 352 L 165 328 L 154 297 L 162 278 L 188 266 L 200 252 L 218 242 L 250 228 L 262 220 L 248 206 L 225 194 L 195 182 L 165 172 L 136 166 L 105 162 L 72 162 L 42 168 Z',
-  // South America
-  'M 224 372 L 208 358 L 196 368 L 180 390 L 178 420 L 192 460 L 202 510 L 214 548 L 220 590 L 232 592 L 244 572 L 254 548 L 258 518 L 248 480 L 256 450 L 276 432 L 308 440 L 320 446 L 308 428 L 288 408 L 265 385 L 248 370 Z',
-  // Europe
-  'M 375 162 L 388 148 L 402 140 L 418 138 L 432 145 L 448 140 L 462 136 L 474 142 L 482 150 L 492 150 L 490 162 L 478 172 L 472 182 L 474 195 L 490 202 L 512 212 L 526 228 L 520 242 L 508 250 L 500 258 L 490 264 L 480 272 L 468 278 L 458 292 L 462 302 L 450 302 L 444 285 L 438 278 L 428 270 L 426 258 L 418 252 L 412 262 L 406 270 L 393 272 L 386 260 L 388 248 L 378 245 L 373 254 L 365 255 L 360 245 L 366 230 L 372 222 L 368 212 L 358 206 L 352 198 L 352 188 L 360 178 L 365 170 L 358 164 L 368 158 Z',
-  // Africa
-  'M 358 282 L 372 265 L 388 256 L 404 256 L 418 262 L 428 258 L 442 266 L 454 280 L 466 285 L 480 288 L 500 300 L 520 315 L 535 335 L 538 358 L 525 380 L 520 402 L 510 422 L 498 445 L 484 470 L 465 492 L 448 504 L 432 502 L 415 488 L 408 468 L 406 448 L 398 428 L 386 405 L 376 380 L 368 355 L 362 328 L 358 302 Z',
-  // Asia (main body)
-  'M 502 260 L 520 242 L 538 235 L 558 240 L 576 250 L 596 255 L 615 268 L 622 310 L 640 322 L 662 308 L 678 292 L 696 278 L 716 270 L 738 268 L 758 270 L 778 268 L 798 272 L 820 278 L 840 278 L 858 280 L 868 294 L 858 310 L 840 325 L 820 338 L 800 346 L 780 356 L 758 360 L 740 352 L 720 345 L 708 352 L 695 365 L 678 378 L 658 388 L 635 388 L 615 375 L 598 360 L 578 352 L 558 346 L 538 336 L 518 318 L 508 298 L 498 278 Z',
-  // India peninsula
-  'M 558 346 L 575 355 L 590 370 L 595 390 L 585 415 L 572 430 L 558 418 L 548 400 L 542 378 L 545 360 Z',
-  // SE Asia/Indochina
-  'M 720 345 L 730 360 L 728 380 L 718 395 L 705 402 L 698 390 L 700 372 L 712 358 Z',
-  // Japan
-  'M 858 250 L 868 256 L 874 272 L 868 282 L 856 278 L 850 262 Z',
-  // Australia
-  'M 735 430 L 758 418 L 782 415 L 808 418 L 832 428 L 848 445 L 852 468 L 845 492 L 828 508 L 808 518 L 782 522 L 758 518 L 738 505 L 722 488 L 715 465 L 718 442 Z',
-]
-
-const AR = 1000 / 600  // original map aspect ratio
+const MAP_W = 1000
+const MAP_H = 600
+const AR = MAP_W / MAP_H
 
 function routeViewBox(route) {
   const o = CITY_NODES.find(n => n.id === route.origin.nodeId)
   const d = CITY_NODES.find(n => n.id === route.dest.nodeId)
-  if (!o || !d) return '0 0 1000 600'
+  if (!o || !d) return `0 0 ${MAP_W} ${MAP_H}`
 
   const cx = (o.cx + d.cx) / 2
   const cy = (o.cy + d.cy) / 2
 
-  // Ensure enough context around the route
   const routeSpanX = Math.abs(d.cx - o.cx)
   const routeSpanY = Math.abs(d.cy - o.cy)
   let vbW = Math.max(routeSpanX + 360, 640)
   let vbH = Math.max(routeSpanY + 280, 400)
 
-  // Lock to original 5:3 aspect so continents don't stretch
+  // Preserve map aspect ratio so countries don't distort
   if (vbW / vbH > AR) {
     vbH = vbW / AR
   } else {
     vbW = vbH * AR
   }
 
-  return `${cx - vbW / 2} ${cy - vbH / 2} ${vbW} ${vbH}`
+  // Keep viewBox within map bounds
+  let x0 = cx - vbW / 2
+  let y0 = cy - vbH / 2
+  x0 = Math.max(0, Math.min(x0, MAP_W - vbW))
+  y0 = Math.max(0, Math.min(y0, MAP_H - vbH))
+
+  return `${x0} ${y0} ${vbW} ${vbH}`
 }
 
 export default function RoutePlanner() {
@@ -165,24 +152,12 @@ export default function RoutePlanner() {
             preserveAspectRatio="xMidYMid meet"
             xmlns="http://www.w3.org/2000/svg"
           >
-            <defs>
-              <pattern id="map-grid" width="50" height="50" patternUnits="userSpaceOnUse">
-                <path d="M 50 0 L 0 0 0 50" fill="none"
-                  stroke="rgba(255,255,255,0.06)" strokeWidth="1" />
-              </pattern>
-            </defs>
-            <rect width="1000" height="600" fill="url(#map-grid)" />
+            <image href="/images/world-map.svg"
+              x="0" y="0" width={MAP_W} height={MAP_H} />
 
             {[150, 200, 250, 300, 350].map(y => (
-              <line key={y} x1="0" y1={y} x2="1000" y2={y}
+              <line key={y} x1="0" y1={y} x2={MAP_W} y2={y}
                 stroke="rgba(255,255,255,0.04)" strokeWidth="1" />
-            ))}
-
-            {CONTINENTS.map((d, i) => (
-              <path key={i} d={d}
-                fill="rgba(255,255,255,0.10)"
-                stroke="rgba(255,255,255,0.22)"
-                strokeWidth="1.2" />
             ))}
 
             {CITY_NODES.map(({ id, cx, cy, label }) => {
