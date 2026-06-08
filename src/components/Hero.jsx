@@ -56,17 +56,7 @@ export default function Hero() {
         </div>
       </div>
 
-      {/* Scroll indicator */}
-      <div className="absolute bottom-10 left-1/2 -translate-x-1/2 flex flex-col items-center gap-4 animate-bounce">
-        <div className="w-1 h-12 rounded-full border border-white/20 flex justify-center p-1">
-          <div className="w-1 h-2 bg-secondary rounded-full" />
-        </div>
-        <span className="font-label-bold text-[10px] tracking-widest text-on-surface/60 uppercase">
-          Aşağı Kaydırın
-        </span>
-      </div>
-
-      {/* Social icons */}
+{/* Social icons */}
       <div className="absolute right-gutter bottom-1/4 flex flex-col gap-6 text-on-surface/50">
         <a href="#" aria-label="Web" className="hover:text-secondary transition-colors">
           <span className="material-symbols-outlined">public</span>
