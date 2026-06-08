@@ -80,12 +80,11 @@ export default function AircraftCarousel() {
                   className="carousel-item"
                   style={{ transform: `rotateY(${angle}deg) translateZ(${radius}px)` }}
                 >
-                  {/* hover efekti sadece kart içeriğine uygulanıyor */}
-                  <div className="carousel-card glass-panel w-full h-full rounded-3xl p-6 flex flex-col items-center justify-between overflow-hidden cursor-pointer">
+                  <div className="carousel-card w-full h-full rounded-3xl p-6 flex flex-col items-center justify-between overflow-hidden cursor-pointer">
                     <img
                       src={plane.image}
                       alt={`${plane.name} pedallı uçak`}
-                      className="w-full h-48 object-contain animate-float"
+                      className="w-full h-48 object-contain"
                       loading="lazy"
                     />
                     <div className="text-center">
