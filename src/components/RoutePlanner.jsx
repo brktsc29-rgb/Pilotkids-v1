@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react'
+import { useState, useRef } from 'react'
 import html2canvas from 'html2canvas'
 import { QRCodeSVG } from 'qrcode.react'
 import { useReveal } from '../hooks/useReveal'
@@ -11,8 +11,7 @@ const ROUTES = {
     origin:   { code: 'IST', name: 'ISTANBUL', nodeId: 'node-IST' },
     dest:     { code: 'CDG', name: 'PARİS',    nodeId: 'node-CDG' },
     path:     'M 500 250 Q 460 220 420 230',
-    gate:     'B-12',
-    seat:     '01-A',
+    gate:     'B-12', seat: '01-A',
     label:    'İSTANBUL ➔ PARİS',
     flightNo: 'PK-2024',
   },
@@ -20,8 +19,7 @@ const ROUTES = {
     origin:   { code: 'LHR', name: 'LONDRA',   nodeId: 'node-LHR' },
     dest:     { code: 'JFK', name: 'NEW YORK', nodeId: 'node-JFK' },
     path:     'M 410 210 Q 300 200 200 260',
-    gate:     'A-04',
-    seat:     '05-C',
+    gate:     'A-04', seat: '05-C',
     label:    'LONDRA ➔ NEW YORK',
     flightNo: 'PK-1969',
   },
@@ -29,8 +27,7 @@ const ROUTES = {
     origin:   { code: 'BER', name: 'BERLİN', nodeId: 'node-BER' },
     dest:     { code: 'NRT', name: 'TOKYO',  nodeId: 'node-NRT' },
     path:     'M 460 215 Q 650 170 850 280',
-    gate:     'G-21',
-    seat:     '03-F',
+    gate:     'G-21', seat: '03-F',
     label:    'BERLİN ➔ TOKYO',
     flightNo: 'PK-3301',
   },
@@ -38,8 +35,7 @@ const ROUTES = {
     origin:   { code: 'FCO', name: 'ROMA',  nodeId: 'node-FCO' },
     dest:     { code: 'DXB', name: 'DUBAİ', nodeId: 'node-DXB' },
     path:     'M 465 275 Q 550 295 620 330',
-    gate:     'E-09',
-    seat:     '02-B',
+    gate:     'E-09', seat: '02-B',
     label:    'ROMA ➔ DUBAİ',
     flightNo: 'PK-7777',
   },
@@ -76,41 +72,14 @@ export default function RoutePlanner() {
   const [selectedRoute, setSelectedRoute] = useState('IST-CDG')
   const [pilotName, setPilotName]         = useState('AYTUĞ')
   const [passAnim, setPassAnim]           = useState(false)
-  const [planePos, setPlanePos]           = useState({ x: 0, y: 0, angle: 0 })
-  const [downloading, setDownloading]     = useState(false)
   const [boarded, setBoarded]             = useState(false)
+  const [downloading, setDownloading]     = useState(false)
 
   const revealRef      = useReveal()
-  const pathRef        = useRef(null)
-  const animRef        = useRef(null)
   const boardingPassRef = useRef(null)
 
-  const route  = ROUTES[selectedRoute]
-  const today  = formatDate()
-
-  // JS-based plane animation along SVG path (reliable cross-browser)
-  useEffect(() => {
-    let progress = 0
-
-    function tick() {
-      const path = pathRef.current
-      if (!path) { animRef.current = requestAnimationFrame(tick); return }
-
-      const len = path.getTotalLength()
-      progress   = (progress + 0.004) % 1
-      const p1   = path.getPointAtLength(progress * len)
-      const p2   = path.getPointAtLength(Math.min((progress + 0.02) * len, len))
-      const angle = Math.atan2(p2.y - p1.y, p2.x - p1.x) * (180 / Math.PI)
-
-      setPlanePos({ x: p1.x, y: p1.y, angle })
-      animRef.current = requestAnimationFrame(tick)
-    }
-
-    cancelAnimationFrame(animRef.current)
-    progress = 0
-    animRef.current = requestAnimationFrame(tick)
-    return () => cancelAnimationFrame(animRef.current)
-  }, [selectedRoute])
+  const route = ROUTES[selectedRoute]
+  const today = formatDate()
 
   function handleRouteChange(e) {
     setSelectedRoute(e.target.value)
@@ -124,14 +93,11 @@ export default function RoutePlanner() {
     setDownloading(true)
     try {
       const canvas = await html2canvas(boardingPassRef.current, {
-        scale: 3,
-        backgroundColor: '#ffffff',
-        useCORS: true,
-        logging: false,
+        scale: 3, backgroundColor: '#ffffff', useCORS: true, logging: false,
       })
-      const link     = document.createElement('a')
-      link.download  = `pilotkids-${route.flightNo}-${pilotName}.png`
-      link.href      = canvas.toDataURL('image/png')
+      const link    = document.createElement('a')
+      link.download = `pilotkids-${route.flightNo}-${pilotName}.png`
+      link.href     = canvas.toDataURL('image/png')
       link.click()
     } finally {
       setDownloading(false)
@@ -152,21 +118,13 @@ export default function RoutePlanner() {
           preserveAspectRatio="xMidYMid slice"
           xmlns="http://www.w3.org/2000/svg"
         >
+          {/* Grid */}
           <defs>
             <pattern id="map-grid" width="50" height="50" patternUnits="userSpaceOnUse">
-              <path d="M 50 0 L 0 0 0 50" fill="none" stroke="rgba(255,255,255,0.04)" strokeWidth="1" />
+              <path d="M 50 0 L 0 0 0 50" fill="none"
+                stroke="rgba(255,255,255,0.04)" strokeWidth="1" />
             </pattern>
-            <filter id="node-glow" x="-80%" y="-80%" width="260%" height="260%">
-              <feGaussianBlur stdDeviation="5" result="blur" />
-              <feMerge><feMergeNode in="blur" /><feMergeNode in="SourceGraphic" /></feMerge>
-            </filter>
-            <filter id="line-glow" x="-20%" y="-200%" width="140%" height="500%">
-              <feGaussianBlur stdDeviation="3" result="blur" />
-              <feMerge><feMergeNode in="blur" /><feMergeNode in="SourceGraphic" /></feMerge>
-            </filter>
           </defs>
-
-          {/* Grid */}
           <rect width="1000" height="600" fill="url(#map-grid)" />
 
           {/* Latitude lines */}
@@ -179,7 +137,7 @@ export default function RoutePlanner() {
           {CONTINENTS.map((d, i) => (
             <path key={i} d={d}
               fill="rgba(255,255,255,0.07)"
-              stroke="rgba(255,255,255,0.15)"
+              stroke="rgba(255,255,255,0.14)"
               strokeWidth="1" />
           ))}
 
@@ -189,52 +147,55 @@ export default function RoutePlanner() {
             if (active) return null
             return (
               <g key={id}>
-                <circle cx={cx} cy={cy} r={3} fill="rgba(255,255,255,0.3)" />
-                <text x={cx + 6} y={cy + 4} fontSize="8" fill="rgba(255,255,255,0.3)"
-                  fontFamily="Montserrat,sans-serif" fontWeight="700">{label}</text>
+                <circle cx={cx} cy={cy} r={3} fill="rgba(255,255,255,0.25)" />
+                <text x={cx + 6} y={cy + 4} fontSize="8"
+                  fill="rgba(255,255,255,0.25)"
+                  fontFamily="Montserrat,sans-serif" fontWeight="700">
+                  {label}
+                </text>
               </g>
             )
           })}
 
-          {/* Dashed flight route — SVG strokeDasharray + CSS animation */}
+          {/* Dashed flight route — pure CSS animation */}
           <path
-            ref={pathRef}
             d={route.path}
             fill="none"
             stroke="#ffc640"
             strokeWidth="2.5"
             strokeLinecap="round"
             strokeDasharray="8 5"
-            filter="url(#line-glow)"
+            opacity="0.9"
             style={{ animation: 'dash 2s linear infinite' }}
           />
 
-          {/* Active city nodes with pulse rings */}
+          {/* Active city nodes — CSS pulse, no SVG filter */}
           {CITY_NODES.map(({ id, cx, cy, label }) => {
             const active = id === route.origin.nodeId || id === route.dest.nodeId
             if (!active) return null
             return (
-              <g key={id} filter="url(#node-glow)">
-                <circle cx={cx} cy={cy} r={12} fill="none"
-                  stroke="rgba(255,198,64,0.4)" strokeWidth="1.5"
+              <g key={id}>
+                <circle cx={cx} cy={cy} r={10} fill="none"
+                  stroke="rgba(255,198,64,0.35)" strokeWidth="1.5"
                   style={{ animation: 'pulse-ring 1.8s ease-out infinite' }} />
                 <circle cx={cx} cy={cy} r={5} fill="#ffc640" />
                 <text x={cx + 8} y={cy + 4} fontSize="9" fill="#ffc640"
-                  fontFamily="Montserrat,sans-serif" fontWeight="700">{label}</text>
+                  fontFamily="Montserrat,sans-serif" fontWeight="700">
+                  {label}
+                </text>
               </g>
             )
           })}
 
-          {/* JS-animated plane */}
-          {planePos.x !== 0 && (
-            <g
-              transform={`translate(${planePos.x},${planePos.y}) rotate(${planePos.angle})`}
-              filter="url(#node-glow)"
-            >
-              <circle r="5" fill="#ffc640" />
-              <polygon points="-8,2 4,0 -8,-2" fill="#ffc640" />
-            </g>
-          )}
+          {/* CSS Motion Path plane — sıfır JS, tam GPU-accelerated
+              key değişince element remount olur → animasyon sıfırlanır */}
+          <circle
+            key={`plane-${selectedRoute}`}
+            r="5"
+            fill="#ffc640"
+            className="plane-motion"
+            style={{ offsetPath: `path('${route.path}')` }}
+          />
         </svg>
       </div>
 
@@ -288,21 +249,22 @@ export default function RoutePlanner() {
               className="w-full bg-on-tertiary-container text-white font-label-bold text-label-bold py-5 rounded-lg flex justify-center items-center gap-2 group hover:brightness-110 active:scale-95 transition-all"
             >
               UÇUŞA HAZIRIM
-              <span className="material-symbols-outlined group-hover:rotate-45 transition-transform">flight</span>
+              <span className="material-symbols-outlined group-hover:rotate-45 transition-transform">
+                flight
+              </span>
             </button>
           </div>
         </div>
 
         {/* Right: boarding pass */}
         <div className="flex flex-col items-center gap-4">
-          {/* Card */}
           <div
             ref={boardingPassRef}
             className={`relative bg-white text-black w-full max-w-md rounded-2xl overflow-hidden shadow-2xl transition-all duration-300 ${
               passAnim ? 'scale-105' : 'sm:rotate-2 hover:rotate-0'
             }`}
           >
-            {/* BOARDED stamp overlay */}
+            {/* BOARDED stamp */}
             {boarded && (
               <div className="absolute inset-0 flex items-center justify-center z-20 pointer-events-none">
                 <div
@@ -316,52 +278,27 @@ export default function RoutePlanner() {
                     opacity: 0.82,
                   }}
                 >
-                  <span
-                    style={{
-                      fontFamily: '"Bebas Neue", cursive',
-                      fontSize: '3.2rem',
-                      lineHeight: 1,
-                      letterSpacing: '0.18em',
-                      color: '#1e3a8a',
-                    }}
-                  >
+                  <span style={{ fontFamily: '"Bebas Neue",cursive', fontSize: '3.2rem', lineHeight: 1, letterSpacing: '0.18em', color: '#1e3a8a' }}>
                     BOARDED
                   </span>
-                  <span
-                    style={{
-                      fontFamily: 'Montserrat, sans-serif',
-                      fontSize: '0.55rem',
-                      fontWeight: 700,
-                      letterSpacing: '0.35em',
-                      color: '#1e3a8a',
-                    }}
-                  >
+                  <span style={{ fontFamily: 'Montserrat,sans-serif', fontSize: '0.55rem', fontWeight: 700, letterSpacing: '0.35em', color: '#1e3a8a' }}>
                     ✦ PILOTKIDS AIRLINES ✦
                   </span>
-                  <span
-                    style={{
-                      fontFamily: 'Montserrat, sans-serif',
-                      fontSize: '0.5rem',
-                      fontWeight: 600,
-                      letterSpacing: '0.2em',
-                      color: '#1e3a8a',
-                      opacity: 0.7,
-                    }}
-                  >
+                  <span style={{ fontFamily: 'Montserrat,sans-serif', fontSize: '0.5rem', fontWeight: 600, letterSpacing: '0.2em', color: '#1e3a8a', opacity: 0.7 }}>
                     {route.flightNo} · {today}
                   </span>
                 </div>
               </div>
             )}
 
-            {/* Header bar */}
+            {/* Header */}
             <div className="bg-on-tertiary-container p-4 flex justify-between items-center text-white">
               <span className="font-label-bold text-[10px] tracking-widest">PILOTKIDS AIRLINES</span>
               <span className="material-symbols-outlined text-sm">flight</span>
             </div>
 
             <div className="p-6 sm:p-8 space-y-5">
-              {/* Captain */}
+              {/* Captain + QR */}
               <div className="flex justify-between items-start">
                 <div>
                   <p className="text-[10px] font-bold text-gray-500 uppercase">Captain</p>
@@ -373,14 +310,7 @@ export default function RoutePlanner() {
                   </p>
                 </div>
                 <div className="flex flex-col items-center gap-1">
-                  <QRCodeSVG
-                    value={SITE_URL}
-                    size={68}
-                    bgColor="#ffffff"
-                    fgColor="#1e3a8a"
-                    level="M"
-                    style={{ display: 'block' }}
-                  />
+                  <QRCodeSVG value={SITE_URL} size={68} bgColor="#ffffff" fgColor="#1e3a8a" level="M" />
                   <span className="text-[7px] font-bold text-gray-400 tracking-wider uppercase">
                     pilotkids.com.tr
                   </span>
@@ -389,7 +319,7 @@ export default function RoutePlanner() {
 
               <div className="rivet-border" />
 
-              {/* Origin → Destination */}
+              {/* Route */}
               <div className="flex justify-between items-center gap-2">
                 <div className="text-center flex-1">
                   <div className="font-display-xl text-4xl sm:text-5xl leading-none">{route.origin.code}</div>
@@ -405,7 +335,7 @@ export default function RoutePlanner() {
                 </div>
               </div>
 
-              {/* Details grid */}
+              {/* Details */}
               <div className="grid grid-cols-4 gap-3 pt-4 border-t border-gray-100">
                 <div>
                   <p className="text-[8px] font-bold text-gray-400 uppercase">Gate</p>
@@ -435,7 +365,7 @@ export default function RoutePlanner() {
             </div>
           </div>
 
-          {/* Download button */}
+          {/* Download */}
           <button
             onClick={handleDownload}
             disabled={downloading}
