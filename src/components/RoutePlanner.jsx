@@ -141,107 +141,108 @@ export default function RoutePlanner() {
   return (
     <section
       id="route-planner-section"
-      className="py-section-gap relative bg-black"
-      style={{ overflow: 'hidden' }}
+      className="py-section-gap bg-black overflow-hidden"
     >
-      {/* SVG world map background */}
-      <div className="absolute inset-0 pointer-events-none" aria-hidden="true">
-        <svg
-          className="w-full h-full"
-          viewBox={routeViewBox(route)}
-          preserveAspectRatio="xMidYMid meet"
-          xmlns="http://www.w3.org/2000/svg"
-        >
-          <defs>
-            <pattern id="map-grid" width="50" height="50" patternUnits="userSpaceOnUse">
-              <path d="M 50 0 L 0 0 0 50" fill="none"
-                stroke="rgba(255,255,255,0.04)" strokeWidth="1" />
-            </pattern>
-          </defs>
-          <rect width="1000" height="600" fill="url(#map-grid)" />
-
-          {[150, 200, 250, 300, 350].map(y => (
-            <line key={y} x1="0" y1={y} x2="1000" y2={y}
-              stroke="rgba(255,255,255,0.03)" strokeWidth="1" />
-          ))}
-
-          {CONTINENTS.map((d, i) => (
-            <path key={i} d={d}
-              fill="rgba(255,255,255,0.07)"
-              stroke="rgba(255,255,255,0.14)"
-              strokeWidth="1" />
-          ))}
-
-          {CITY_NODES.map(({ id, cx, cy, label }) => {
-            const active = id === route.origin.nodeId || id === route.dest.nodeId
-            if (active) return null
-            return (
-              <g key={id}>
-                <circle cx={cx} cy={cy} r={3} fill="rgba(255,255,255,0.25)" />
-                <text x={cx + 6} y={cy + 4} fontSize="8"
-                  fill="rgba(255,255,255,0.25)"
-                  fontFamily="Montserrat,sans-serif" fontWeight="700">
-                  {label}
-                </text>
-              </g>
-            )
-          })}
-
-          <path
-            d={route.path}
-            fill="none"
-            stroke="#ffc640"
-            strokeWidth="2.5"
-            strokeLinecap="round"
-            strokeDasharray="8 5"
-            opacity="0.9"
-            style={{ animation: 'dash 2s linear infinite' }}
-          />
-
-          {CITY_NODES.map(({ id, cx, cy, label }) => {
-            const active = id === route.origin.nodeId || id === route.dest.nodeId
-            if (!active) return null
-            return (
-              <g key={id}>
-                <circle cx={cx} cy={cy} r={5} fill="none"
-                  stroke="rgba(255,198,64,0.6)" strokeWidth="1.5">
-                  <animate attributeName="r" from="5" to="22" dur="1.8s" repeatCount="indefinite" />
-                  <animate attributeName="opacity" from="0.8" to="0" dur="1.8s" repeatCount="indefinite" />
-                </circle>
-                <circle cx={cx} cy={cy} r={5} fill="#ffc640" />
-                <text x={cx + 8} y={cy + 4} fontSize="9" fill="#ffc640"
-                  fontFamily="Montserrat,sans-serif" fontWeight="700">
-                  {label}
-                </text>
-              </g>
-            )
-          })}
-
-          <circle
-            key={"plane-" + selectedRoute}
-            r="5"
-            fill="#ffc640"
-            className="plane-motion"
-            style={{ offsetPath: "path('" + route.path + "')" }}
-          />
-        </svg>
-      </div>
-
       <div
         ref={revealRef}
-        className="reveal relative z-10 max-w-container-max mx-auto px-gutter grid grid-cols-1 lg:grid-cols-2 gap-16 items-center"
+        className="reveal max-w-container-max mx-auto px-gutter space-y-10"
       >
-        {/* Left: form */}
-        <div className="space-y-8">
-          <div>
-            <span className="font-label-bold text-label-bold text-on-tertiary-container uppercase tracking-widest">
-              {r.sectionLabel}
-            </span>
-            <h2 className="font-headline-lg text-headline-lg text-white uppercase mt-2">
-              {r.sectionTitle}
-            </h2>
-          </div>
+        {/* Header */}
+        <div>
+          <span className="font-label-bold text-label-bold text-on-tertiary-container uppercase tracking-widest">
+            {r.sectionLabel}
+          </span>
+          <h2 className="font-headline-lg text-headline-lg text-white uppercase mt-2">
+            {r.sectionTitle}
+          </h2>
+        </div>
 
+        {/* Map card — always visible */}
+        <div className="w-full h-52 sm:h-64 md:h-80 rounded-2xl overflow-hidden border border-white/10 bg-[#050a0a]">
+          <svg
+            className="w-full h-full"
+            viewBox={routeViewBox(route)}
+            preserveAspectRatio="xMidYMid meet"
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <defs>
+              <pattern id="map-grid" width="50" height="50" patternUnits="userSpaceOnUse">
+                <path d="M 50 0 L 0 0 0 50" fill="none"
+                  stroke="rgba(255,255,255,0.06)" strokeWidth="1" />
+              </pattern>
+            </defs>
+            <rect width="1000" height="600" fill="url(#map-grid)" />
+
+            {[150, 200, 250, 300, 350].map(y => (
+              <line key={y} x1="0" y1={y} x2="1000" y2={y}
+                stroke="rgba(255,255,255,0.04)" strokeWidth="1" />
+            ))}
+
+            {CONTINENTS.map((d, i) => (
+              <path key={i} d={d}
+                fill="rgba(255,255,255,0.10)"
+                stroke="rgba(255,255,255,0.22)"
+                strokeWidth="1.2" />
+            ))}
+
+            {CITY_NODES.map(({ id, cx, cy, label }) => {
+              const active = id === route.origin.nodeId || id === route.dest.nodeId
+              if (active) return null
+              return (
+                <g key={id}>
+                  <circle cx={cx} cy={cy} r={3} fill="rgba(255,255,255,0.30)" />
+                  <text x={cx + 6} y={cy + 4} fontSize="8"
+                    fill="rgba(255,255,255,0.30)"
+                    fontFamily="Montserrat,sans-serif" fontWeight="700">
+                    {label}
+                  </text>
+                </g>
+              )
+            })}
+
+            <path
+              d={route.path}
+              fill="none"
+              stroke="#ffc640"
+              strokeWidth="2.5"
+              strokeLinecap="round"
+              strokeDasharray="8 5"
+              opacity="0.9"
+              style={{ animation: 'dash 2s linear infinite' }}
+            />
+
+            {CITY_NODES.map(({ id, cx, cy, label }) => {
+              const active = id === route.origin.nodeId || id === route.dest.nodeId
+              if (!active) return null
+              return (
+                <g key={id}>
+                  <circle cx={cx} cy={cy} r={5} fill="none"
+                    stroke="rgba(255,198,64,0.6)" strokeWidth="1.5">
+                    <animate attributeName="r" from="5" to="22" dur="1.8s" repeatCount="indefinite" />
+                    <animate attributeName="opacity" from="0.8" to="0" dur="1.8s" repeatCount="indefinite" />
+                  </circle>
+                  <circle cx={cx} cy={cy} r={5} fill="#ffc640" />
+                  <text x={cx + 8} y={cy + 4} fontSize="9" fill="#ffc640"
+                    fontFamily="Montserrat,sans-serif" fontWeight="700">
+                    {label}
+                  </text>
+                </g>
+              )
+            })}
+
+            <circle
+              key={"plane-" + selectedRoute}
+              r="5"
+              fill="#ffc640"
+              className="plane-motion"
+              style={{ offsetPath: "path('" + route.path + "')" }}
+            />
+          </svg>
+        </div>
+
+        {/* Form + Boarding pass */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-start">
+          {/* Left: form */}
           <div className="space-y-6 max-w-sm">
             <div className="space-y-2">
               <label className="font-label-bold text-label-bold text-white/60 uppercase block">
@@ -281,7 +282,6 @@ export default function RoutePlanner() {
               </span>
             </button>
           </div>
-        </div>
 
         {/* Right: boarding pass */}
         <div className="flex flex-col items-center gap-4">
@@ -395,7 +395,8 @@ export default function RoutePlanner() {
             {downloading ? r.downloading : r.downloadBtn}
           </button>
         </div>
-      </div>
+        </div>{/* end grid */}
+      </div>{/* end container */}
     </section>
   )
 }
