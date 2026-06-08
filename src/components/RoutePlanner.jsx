@@ -337,7 +337,12 @@ export default function RoutePlanner() {
             </div>
 
             <button
-              onClick={() => setBoarded(true)}
+              onClick={() => {
+                setBoarded(true)
+                setTimeout(() => {
+                  boardingPassRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' })
+                }, 50)
+              }}
               className="w-full bg-on-tertiary-container text-white font-label-bold text-label-bold py-5 rounded-lg flex justify-center items-center gap-2 group hover:brightness-110 active:scale-95 transition-all"
             >
               {r.ctaButton}
