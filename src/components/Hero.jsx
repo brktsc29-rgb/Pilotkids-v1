@@ -8,7 +8,7 @@ export default function Hero() {
       {/* Background */}
       <div className="absolute inset-0 z-0">
         <img
-          src="/images/hero-plane.png"
+          src="/images/hero-plane.webp"
           alt="PilotKids hero – çocuk pedalı uçakla"
           className="w-full h-full object-cover brightness-75"
         />

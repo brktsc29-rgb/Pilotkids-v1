@@ -5,25 +5,25 @@ const PLANES = [
   {
     name: 'RED BARON',
     subtitle: 'Klasik Çift Kanatlı',
-    image: '/images/model-red.png',
+    image: '/images/model-red.webp',
     hoverClass: 'hover:bg-on-tertiary-container/10 hover:border-on-tertiary-container/30',
   },
   {
     name: 'BLACK EAGLE',
     subtitle: 'Solo Türk Özel Serisi',
-    image: '/images/model-black.png',
+    image: '/images/model-black.webp',
     hoverClass: 'hover:bg-primary/10 hover:border-primary/30',
   },
   {
     name: 'PINK PRINCESS',
     subtitle: 'Zarif Tasarım',
-    image: '/images/model-pink.png',
+    image: '/images/model-pink.webp',
     hoverClass: 'hover:bg-secondary/10 hover:border-secondary/30',
   },
   {
     name: 'WHITE CAPTAIN',
     subtitle: 'Modern Havacılık',
-    image: '/images/model-white.png',
+    image: '/images/model-white.webp',
     hoverClass: 'hover:bg-white/10 hover:border-white/30',
   },
 ]

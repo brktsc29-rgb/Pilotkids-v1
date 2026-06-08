@@ -48,7 +48,7 @@ export default function Events() {
           <div className="glass-panel ticket-shape h-40 flex overflow-hidden hover:bg-white/5 transition-all cursor-pointer">
             <div className="flex-1 p-0 relative min-w-0">
               <img
-                src="/images/gallery-1.png"
+                src="/images/gallery-1.webp"
                 alt="Teknofest etkinlik görseli"
                 className="absolute inset-0 w-full h-full object-cover opacity-40"
               />

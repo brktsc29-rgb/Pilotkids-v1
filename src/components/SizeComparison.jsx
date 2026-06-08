@@ -1,9 +1,9 @@
 import { useReveal } from '../hooks/useReveal'
 
 const SIZES = [
-  { age: '3', range: '95-110 cm', image: '/images/gallery-1.png', alt: '3 yaş çocuk pedallı uçakla' },
-  { age: '5', range: '110-120 cm', image: '/images/gallery-2.png', alt: '5 yaş çocuk pedallı uçakla' },
-  { age: '7', range: '120-140 cm', image: '/images/hero-plane.png', alt: '7 yaş çocuk pedallı uçakla' },
+  { age: '3', range: '95-110 cm', image: '/images/gallery-1.webp', alt: '3 yaş çocuk pedallı uçakla' },
+  { age: '5', range: '110-120 cm', image: '/images/gallery-2.webp', alt: '5 yaş çocuk pedallı uçakla' },
+  { age: '7', range: '120-140 cm', image: '/images/hero-plane.webp', alt: '7 yaş çocuk pedallı uçakla' },
 ]
 
 export default function SizeComparison() {
