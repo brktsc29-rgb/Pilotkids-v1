@@ -54,11 +54,11 @@ body {
 
 /* ─── SVG route dash animation ──────────────────────── */
 .route-line {
-  stroke-dasharray: 10;
-  animation: dash 20s linear infinite;
+  stroke-dasharray: 8 5;
+  animation: dash 2s linear infinite;
 }
 @keyframes dash {
-  to { stroke-dashoffset: -500; }
+  to { stroke-dashoffset: -26; }
 }
 
 /* ─── City node active state ────────────────────────── */
