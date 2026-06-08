@@ -1,7 +1,10 @@
 import { useState, useEffect, useRef } from 'react'
 import html2canvas from 'html2canvas'
+import { QRCodeSVG } from 'qrcode.react'
 import { useReveal } from '../hooks/useReveal'
 import Barcode from './Barcode'
+
+const SITE_URL = 'https://pilotkids.com.tr'
 
 const ROUTES = {
   'IST-CDG': {
@@ -369,8 +372,18 @@ export default function RoutePlanner() {
                     Ready for departure!
                   </p>
                 </div>
-                <div className="opacity-10">
-                  <span className="material-symbols-outlined text-5xl">airplane_ticket</span>
+                <div className="flex flex-col items-center gap-1">
+                  <QRCodeSVG
+                    value={SITE_URL}
+                    size={68}
+                    bgColor="#ffffff"
+                    fgColor="#1e3a8a"
+                    level="M"
+                    style={{ display: 'block' }}
+                  />
+                  <span className="text-[7px] font-bold text-gray-400 tracking-wider uppercase">
+                    pilotkids.com.tr
+                  </span>
                 </div>
               </div>
 
