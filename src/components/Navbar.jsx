@@ -1,16 +1,21 @@
-const NAV_LINKS = [
-  { label: 'ANA SAYFA',  target: 'hero' },
-  { label: 'UÇAKLAR',    target: 'aircraft' },
-  { label: 'ETKİNLİKLER', target: 'events' },
-  { label: 'HAKKIMIZDA', target: 'about' },
-  { label: 'İLETİŞİM',   target: 'contact' },
-]
+import { useLanguage } from '../context/LanguageContext'
+import LanguageSwitcher from './LanguageSwitcher'
 
 function scrollTo(id) {
   document.getElementById(id)?.scrollIntoView({ behavior: 'smooth' })
 }
 
 export default function Navbar() {
+  const { t } = useLanguage()
+
+  const NAV_LINKS = [
+    { label: t.nav.home,     target: 'hero' },
+    { label: t.nav.aircraft, target: 'aircraft' },
+    { label: t.nav.events,   target: 'events' },
+    { label: t.nav.about,    target: 'about' },
+    { label: t.nav.contact,  target: 'contact' },
+  ]
+
   return (
     <nav className="fixed top-0 w-full z-50 bg-surface/30 backdrop-blur-md border-b border-white/10 shadow-xl">
       <div className="flex justify-between items-center px-gutter py-4 max-w-container-max mx-auto">
@@ -37,12 +42,15 @@ export default function Navbar() {
           ))}
         </div>
 
-        <button
-          onClick={() => scrollTo('aircraft')}
-          className="bg-on-tertiary-container text-white font-label-bold text-label-bold px-6 py-3 rounded-full hover:scale-105 active:scale-95 transition-all shadow-lg shadow-on-tertiary-container/20"
-        >
-          UÇAĞINI KEŞFET
-        </button>
+        <div className="flex items-center gap-3">
+          <LanguageSwitcher />
+          <button
+            onClick={() => scrollTo('aircraft')}
+            className="bg-on-tertiary-container text-white font-label-bold text-label-bold px-6 py-3 rounded-full hover:scale-105 active:scale-95 transition-all shadow-lg shadow-on-tertiary-container/20"
+          >
+            {t.nav.cta}
+          </button>
+        </div>
       </div>
     </nav>
   )

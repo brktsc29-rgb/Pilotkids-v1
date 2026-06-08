@@ -1,4 +1,10 @@
+import { useLanguage } from '../context/LanguageContext'
+
 export default function Footer() {
+  const { t } = useLanguage()
+  const f = t.footer
+  const [line1, line2] = f.headline.split('\n')
+
   return (
     <footer
       id="contact"
@@ -6,10 +12,10 @@ export default function Footer() {
     >
       <div className="relative z-10 flex flex-col items-center gap-base py-section-gap px-gutter text-center max-w-container-max mx-auto">
         <h2 className="font-headline-lg text-headline-lg text-white uppercase max-w-2xl leading-tight mb-4">
-          HER BÜYÜK PİLOTUN <br /> BİR İLK UÇUŞU VARDIR.
+          {line1} <br /> {line2}
         </h2>
         <p className="font-body-md text-on-surface-variant mb-12">
-          Bir sonraki etkinlikte görüşmek üzere!
+          {f.subtext}
         </p>
 
         <div className="flex items-center gap-2 mb-12">
@@ -25,10 +31,10 @@ export default function Footer() {
           <a href="#" aria-label="YouTube" className="text-on-surface-variant hover:text-white transition-colors">
             <span className="material-symbols-outlined">play_circle</span>
           </a>
-          <a href="#" aria-label="E-posta" className="text-on-surface-variant hover:text-white transition-colors">
+          <a href="#" aria-label="Email" className="text-on-surface-variant hover:text-white transition-colors">
             <span className="material-symbols-outlined">alternate_email</span>
           </a>
-          <a href="#" aria-label="Dil" className="text-on-surface-variant hover:text-white transition-colors">
+          <a href="#" aria-label="Language" className="text-on-surface-variant hover:text-white transition-colors">
             <span className="material-symbols-outlined">language</span>
           </a>
         </div>
@@ -36,10 +42,10 @@ export default function Footer() {
         <div className="w-full h-px bg-gradient-to-r from-transparent via-outline-variant to-transparent mb-8" />
 
         <div className="flex flex-col md:flex-row gap-6 justify-between w-full text-[10px] font-label-bold text-on-surface-variant uppercase tracking-widest">
-          <p>© 2024 PILOTKIDS. TÜM HAKLARI SAKLIDIR.</p>
+          <p>{f.copyright}</p>
           <div className="flex gap-8 justify-center">
-            <a href="#" className="hover:text-primary transition-colors">Privacy Policy</a>
-            <a href="#" className="hover:text-primary transition-colors">Terms of Service</a>
+            <a href="#" className="hover:text-primary transition-colors">{f.privacy}</a>
+            <a href="#" className="hover:text-primary transition-colors">{f.terms}</a>
           </div>
         </div>
       </div>
